@@ -1,38 +1,56 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Navbar() {
-  const [isoffdishdash, setoffdishdash] = useState(false);
-  const [data, setData] = useState("");
-  const [loading, setLoading] = useState(true); // To show loading state
-  const [error, setError] = useState(""); // For error handling
+  const [isOffCanvasOpen, setOffCanvasOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   // Toggle function for offcanvas menu
-  const toggleofdishdash = () => {
-    setoffdishdash(!isoffdishdash);
+  const toggleOffCanvas = () => {
+    setOffCanvasOpen(!isOffCanvasOpen);
   };
 
+  // Check if user is authenticated (JWT Token exists)
+  const isAuthenticated = !!localStorage.getItem("token");
+
+  // Fetch user data from backend
   useEffect(() => {
-    fetch("http://localhost:7000/get")
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
+    fetch("http://localhost:7000/getUser", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    })
       .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        // Check if the response is JSON
-        const contentType = response.headers.get("Content-Type");
-        if (contentType && contentType.includes("application/json")) {
-          return response.json();
-        }
-        throw new Error("Response is not JSON");
+        if (!response.ok) throw new Error("Failed to fetch user data");
+        return response.json();
       })
       .then((data) => {
-        setData(data.at || ""); // Use data from backend if available
+        setUser(data);
         setLoading(false);
       })
       .catch((error) => {
-        setError("Fetch error: " + error.message);
+        setError(error.message);
         setLoading(false);
       });
-  }, []); // Empty dependency array ensures the effect runs only once
+  }, []);
+
+  // Handle Logout
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setUser(null);
+    navigate("/login");
+  };
 
   return (
     <>
@@ -43,12 +61,7 @@ function Navbar() {
           </a>
 
           <form className="d-flex mt-2" role="search">
-            <input
-              className="form-control me-2"
-              type="search"
-              placeholder="Search"
-              aria-label="Search"
-            />
+            <input className="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
             <button className="btn btn-success" type="submit">
               Search
             </button>
@@ -57,52 +70,36 @@ function Navbar() {
           <button
             className="navbar-toggler"
             type="button"
-            onClick={toggleofdishdash}
+            onClick={toggleOffCanvas}
             aria-controls="offcanvasDarkNavbar"
             aria-label="Toggle navigation"
           >
             <span className="navbar-toggler-icon"></span>
           </button>
 
-          {/* Offcanvas Section with Dynamic State */}
-          <div
-            className={`offcanvas offcanvas-end text-bg ${
-              isoffdishdash ? "show" : ""
-            }`}
-            tabIndex="-1"
-            id="offcanvasDarkNavbar"
-            aria-labelledby="offcanvasDarkNavbarLabel"
-          >
+          {/* Offcanvas Section */}
+          <div className={`offcanvas offcanvas-end text-bg ${isOffCanvasOpen ? "show" : ""}`} id="offcanvasDarkNavbar">
             <div className="offcanvas-header">
-              <h5 className="offcanvas-title" id="offcanvasDarkNavbarLabel"></h5>
-              <button
-                type="button"
-                className="btn-close btn-close"
-                onClick={toggleofdishdash}
-                aria-label="Close"
-              ></button>
+              <h5 className="offcanvas-title" id="offcanvasDarkNavbarLabel">Menu</h5>
+              <button type="button" className="btn-close" onClick={toggleOffCanvas} aria-label="Close"></button>
             </div>
             <div className="offcanvas-body">
               <ul className="navbar-nav justify-content-end flex-grow-1 pe-3">
                 <li className="nav-item">
-                  <a className="nav-link active" aria-current="page" href="#">
-                    Home
-                  </a>
+                  <a className="nav-link active" href="#">Home</a>
                 </li>
                 <li className="nav-item">
-                  <a className="nav-link" href="#">
-                    Orders
-                  </a>
+                  <a className="nav-link" href="#">Orders</a>
                 </li>
                 <li className="nav-item">
-                  <a className="nav-link" href="#">
-                    Profile
-                  </a>
+                  <a className="nav-link" href="#">Profile</a>
                 </li>
-                <li className="nav-item dropdown">
-                  <a className="nav-link" href="/login">
-                    Login
-                  </a>
+                <li className="nav-item">
+                  {isAuthenticated ? (
+                    <button className="btn btn-danger" onClick={handleLogout}>Logout</button>
+                  ) : (
+                    <a className="nav-link" href="/login">Login</a>
+                  )}
                 </li>
               </ul>
             </div>

@@ -1,70 +1,94 @@
-import React, { useState } from "react"; 
-// Fix: Import useState correctly
-import { FaUser, FaLock, FaFacebook, FaGoogle, FaTwitter } from "react-icons/fa";
-// import "bootstrap/dist/css/bootstrap.min.css";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-function Login() {
-  const [issinup, setsinup] = useState(false);
+const Login = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const togglesinup = () => {
-    setsinup(!issinup);
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      const response = await fetch("http://localhost:7000/api/Login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Login failed");
+
+      // Store token & Redirect
+      localStorage.setItem("token", data.token);
+      navigate("/");
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   return (
-    <div className="d-flex justify-content-center align-items-center vh-100 bg">
-      <div className="card p-4 shadow-lg" style={{ width: "350px", borderRadius: "20px" }}>
-        <h3 className="text-center">Login</h3>
+    <div className="d-flex align-items-center justify-content-center vh-100 bg-light">
+      <div className="card shadow-lg p-4 w-100" style={{ maxWidth: "400px" }}>
+        <h2 className="text-center text-primary">Login</h2>
 
-        {/* Username Input */}
-        <div className="input-group my-3">
-          <span className="input-group-text">
-            <FaUser />
-          </span>
-          <input type="text" className="form-control" placeholder="Username or Email" />
+        {error && <div className="alert alert-danger">{error}</div>}
+
+        <form onSubmit={handleLogin}>
+          {/* Email */}
+          <div className="mb-3">
+            <label className="form-label">Email</label>
+            <input
+              type="email"
+              className="form-control"
+              placeholder="Enter email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          {/* Password */}
+          <div className="mb-3">
+            <label className="form-label">Password</label>
+            <input
+              type="password"
+              className="form-control"
+              placeholder="Enter password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          {/* Forgot Password */}
+          <div className="mb-3 text-end">
+            <a href="#" className="text-primary">Forgot Password?</a>
+          </div>
+
+          {/* Login Button */}
+          <button type="submit" className="btn btn-primary w-100">
+            LOGIN
+          </button>
+        </form>
+
+        {/* Sign Up */}
+        <div className="text-center mt-3">
+          <p>
+            Don't have an account? <a href="/register" className="text-primary">Sign Up</a>
+          </p>
         </div>
 
-        {/* Password Input */}
-        <div className="input-group my-3">
-          <span className="input-group-text">
-            <FaLock />
-          </span>
-          <input type="password" className="form-control" placeholder="Password" />
-        </div>
-
-        {/* Login Button */}
-        <button className="btn btn-primary w-100">LOGIN</button>
-
-        {/* Forgot Password */}
-        <p className="text-center mt-2">
-          <a href="#">Forgot Password?</a>
-        </p>
-
-        {/* Sign Up Link */}
-        <p className="text-center">
-          Don't have an account?{" "}
-          <a href="#" onClick={togglesinup}>
-            Sign Up
-          </a>
-        </p>
-
-        <hr />
-
-        {/* Social Media Login */}
-        <p className="text-center">Sign up with Social Networks</p>
-        <div className="d-flex justify-content-center">
-          <a href="#" className="mx-2 text-primary">
-            <FaFacebook size={25} />
-          </a>
-          <a href="#" className="mx-2 text-danger">
-            <FaGoogle size={25} />
-          </a>
-          <a href="#" className="mx-2 text-info">
-            <FaTwitter size={25} />
-          </a>
+        {/* Social Logins */}
+        <div className="text-center mt-3">
+          <button className="btn btn-danger w-100 my-1">Login with Google</button>
+          <button className="btn btn-primary w-100 my-1">Login with Facebook</button>
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default Login;
