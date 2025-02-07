@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Form, Button, Container, Card, Alert } from "react-bootstrap";
 import { isStrongPassword } from "validator";
+import { useNavigate } from "react-router-dom";
 
 const Register = () => {
   const [formdata, setformdata] = useState({
@@ -10,15 +11,21 @@ const Register = () => {
     role: "",
   });
 
-  const [message, setmessage] = useState("");
+  const navigate = useNavigate();
+  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  const handlechange = (e) => {
+  const handleChange = (e) => {
     setformdata({ ...formdata, [e.target.name]: e.target.value });
   };
 
-  const handlesubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!formdata.name || !formdata.email || !formdata.password || !formdata.role) {
+      alert("Please fill in all fields.");
+      return;
+    }
 
     if (!isStrongPassword(formdata.password)) {
       setError("Password must be strong! (Use uppercase, lowercase, number, and special character)");
@@ -37,9 +44,12 @@ const Register = () => {
       const data = await response.json();
 
       if (response.ok) {
-        setmessage("Registration Successful!");
+        setMessage("Registration Successful!");
         setError("");
         setformdata({ name: "", email: "", password: "", role: "" }); // Clear form
+
+        // Navigate to home after successful registration
+        navigate("/home");
       } else {
         setError(data.message || "Registration failed!");
       }
@@ -54,7 +64,8 @@ const Register = () => {
         <h2 className="text-center">Register</h2>
         {message && <Alert variant="success">{message}</Alert>}
         {error && <Alert variant="danger">{error}</Alert>}
-        <Form onSubmit={handlesubmit}>
+
+        <Form onSubmit={handleSubmit}>
           <Form.Group className="mb-3">
             <Form.Label>Name</Form.Label>
             <Form.Control
@@ -62,7 +73,7 @@ const Register = () => {
               name="name"
               placeholder="Enter your name"
               value={formdata.name}
-              onChange={handlechange}
+              onChange={handleChange}
               required
             />
           </Form.Group>
@@ -74,7 +85,7 @@ const Register = () => {
               name="email"
               placeholder="Enter your email"
               value={formdata.email}
-              onChange={handlechange}
+              onChange={handleChange}
               required
             />
           </Form.Group>
@@ -86,14 +97,14 @@ const Register = () => {
               name="password"
               placeholder="Enter a strong password"
               value={formdata.password}
-              onChange={handlechange}
+              onChange={handleChange}
               required
             />
           </Form.Group>
 
           <Form.Group className="mb-3">
             <Form.Label>Role</Form.Label>
-            <Form.Select name="role" value={formdata.role} onChange={handlechange} required>
+            <Form.Select name="role" value={formdata.role} onChange={handleChange} required>
               <option value="">Select Role</option>
               <option value="customer">Customer</option>
               <option value="admin">Admin</option>

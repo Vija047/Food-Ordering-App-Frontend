@@ -54,7 +54,7 @@ function Navbar() {
 
   return (
     <>
-      <nav className="navbar navbar bg-light fixed-top">
+      <nav className=" navbar sticky-top bg-body-tertiary">
         <div className="container-fluid">
           <a className="navbar-brand" href="#">
             DishDash
@@ -80,13 +80,13 @@ function Navbar() {
           {/* Offcanvas Section */}
           <div className={`offcanvas offcanvas-end text-bg ${isOffCanvasOpen ? "show" : ""}`} id="offcanvasDarkNavbar">
             <div className="offcanvas-header">
-              <h5 className="offcanvas-title" id="offcanvasDarkNavbarLabel">Menu</h5>
+              <h5 className="offcanvas-title" id="offcanvasDarkNavbarLabel">DishDash</h5>
               <button type="button" className="btn-close" onClick={toggleOffCanvas} aria-label="Close"></button>
             </div>
             <div className="offcanvas-body">
               <ul className="navbar-nav justify-content-end flex-grow-1 pe-3">
                 <li className="nav-item">
-                  <a className="nav-link active" href="#">Home</a>
+                  <a className="nav-link active" href="/home">Home</a>
                 </li>
                 <li className="nav-item">
                   <a className="nav-link" href="#">Orders</a>
