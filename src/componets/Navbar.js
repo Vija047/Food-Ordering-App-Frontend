@@ -40,7 +40,7 @@ function Navbar() {
         setLoading(false);
       })
       .catch((error) => {
-        setError(error.message);
+        setError(error?.message||"an unepected error occurred");
         setLoading(false);
       });
   }, []);
@@ -56,16 +56,16 @@ function Navbar() {
     <>
       <nav className=" navbar sticky-top bg-body-tertiary">
         <div className="container-fluid">
-          <a className="navbar-brand" href="#">
+          <a className="navbar-brand" href="/">
             DishDash
           </a>
 
-          <form className="d-flex mt-2" role="search">
+          {/* <form className="d-flex mt-2" role="search">
             <input className="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
             <button className="btn btn-success" type="submit">
               Search
             </button>
-          </form>
+          </form> */}
 
           <button
             className="navbar-toggler"
@@ -89,10 +89,10 @@ function Navbar() {
                   <a className="nav-link active" href="/home">Home</a>
                 </li>
                 <li className="nav-item">
-                  <a className="nav-link" href="#">Orders</a>
+                  <a className="nav-link" href="/order">Orders</a>
                 </li>
                 <li className="nav-item">
-                  <a className="nav-link" href="#">Profile</a>
+                  <a className="nav-link" href="/profile">Profile</a>
                 </li>
                 <li className="nav-item">
                   {isAuthenticated ? (
