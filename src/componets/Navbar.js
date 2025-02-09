@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaMapMarkerAlt } from "react-icons/fa"; // Importing location icon
+import Sybol from "../assets/icons8-d-64.svg";
 
 function Navbar() {
   const [isOffCanvasOpen, setOffCanvasOpen] = useState(false);
@@ -87,21 +88,28 @@ function Navbar() {
 
   return (
     <nav className="navbar sticky-top bg-body-tertiary">
-      <div className="container-fluid">
-        <a className="navbar-brand d-flex align-items-center" href="/">
-          DishDash
-
-          {/* Location Display */}
-        <div className="location-container d-flex align-items-center">
-          <FaMapMarkerAlt color="rgb(255, 87, 51)" size={20} />
-          <span className="fw-bold"> Location,{location}</span>
+      <div className="container-fluid d-flex justify-content-between align-items-center">
+        
+        {/* Left Section: Logo and Location in Column */}
+        <div className="d-flex flex-row align-items-center">
+          <a href="/">
+            <img src={Sybol} alt="Symbol" className="w-16 h-16 object-cover rounded-lg" />
+          </a>
+          <div className="location-container d-flex align-items-center mt-1">
+            <FaMapMarkerAlt color="rgb(255, 87, 51)" size={18} />
+            <span className="fw-bold ms-2"> {location}</span>
+          </div>
         </div>
 
-        </a>
+        {/* Right Section: Offcanvas Button */}
+<div>
 
-       
 
-        <button
+ <p>jhsd</p>
+
+</div>
+       <div>
+  <button
           className="navbar-toggler"
           type="button"
           onClick={toggleOffCanvas}
@@ -111,10 +119,8 @@ function Navbar() {
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        <div
-          className={`offcanvas offcanvas-end ${isOffCanvasOpen ? "show d-block" : ""}`}
-          id="offcanvasDarkNavbar"
-        >
+        {/* Offcanvas Menu */}
+        <div className={`offcanvas offcanvas-end ${isOffCanvasOpen ? "show d-block" : ""}`} id="offcanvasDarkNavbar">
           <div className="offcanvas-header">
             <h5 className="offcanvas-title" id="offcanvasDarkNavbarLabel">
               DishDash
@@ -157,6 +163,11 @@ function Navbar() {
             </ul>
           </div>
         </div>
+
+
+       </div>
+      
+
       </div>
     </nav>
   );
