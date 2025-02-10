@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaMapMarkerAlt } from "react-icons/fa"; // Importing location icon
 import Sybol from "../assets/icons8-d-64.svg";
+import Cart from "../assets/icart.svg";
 
 function Navbar() {
   const [isOffCanvasOpen, setOffCanvasOpen] = useState(false);
@@ -89,11 +90,14 @@ function Navbar() {
   return (
     <nav className="navbar sticky-top bg-body-tertiary">
       <div className="container-fluid d-flex justify-content-between align-items-center">
-        
-        {/* Left Section: Logo and Location in Column */}
+        {/* Left Section: Logo and Location */}
         <div className="d-flex flex-row align-items-center">
           <a href="/">
-            <img src={Sybol} alt="Symbol" className="w-16 h-16 object-cover rounded-lg" />
+            <img
+              src={Sybol}
+              alt="Symbol"
+              className="w-16 h-16 object-cover rounded-lg"
+            />
           </a>
           <div className="location-container d-flex align-items-center mt-1">
             <FaMapMarkerAlt color="rgb(255, 87, 51)" size={18} />
@@ -101,26 +105,39 @@ function Navbar() {
           </div>
         </div>
 
-        {/* Right Section: Offcanvas Button */}
-<div>
+        {/* Right Section: Cart Icon and Offcanvas Button */}
+        <div className="d-flex align-items-center ms-auto">
+          
+          <button href="/cart" className="badge badge-danger btn border-0 position-relative">
+            <img
+              src={Cart}
+              alt="Cart"
+              className="w-5 h-5 object-cover rounded-lg "
+            />
+  <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+    1
+  </span>
 
+          </button>
 
- <p>jhsd</p>
-
-</div>
-       <div>
-  <button
-          className="navbar-toggler"
-          type="button"
-          onClick={toggleOffCanvas}
-          aria-controls="offcanvasDarkNavbar"
-          aria-label="Toggle navigation"
-        >
-          <span className="navbar-toggler-icon"></span>
-        </button>
+          <button
+            className="navbar-toggler ms-3"
+            type="button"
+            onClick={toggleOffCanvas}
+            aria-controls="offcanvasDarkNavbar"
+            aria-label="Toggle navigation"
+          >
+            <span className="navbar-toggler-icon"></span>
+          </button>
+        </div>
 
         {/* Offcanvas Menu */}
-        <div className={`offcanvas offcanvas-end ${isOffCanvasOpen ? "show d-block" : ""}`} id="offcanvasDarkNavbar">
+        <div
+          className={`offcanvas offcanvas-end ${
+            isOffCanvasOpen ? "show d-block" : ""
+          }`}
+          id="offcanvasDarkNavbar"
+        >
           <div className="offcanvas-header">
             <h5 className="offcanvas-title" id="offcanvasDarkNavbarLabel">
               DishDash
@@ -163,11 +180,6 @@ function Navbar() {
             </ul>
           </div>
         </div>
-
-
-       </div>
-      
-
       </div>
     </nav>
   );
