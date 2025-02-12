@@ -14,7 +14,7 @@ const Menu = ({ restaurantId }) => {
     try {
       console.log("Fetching menu for Restaurant ID:", restaurantId);
 
-      const response = await fetch(`http://localhost:7000/api/admin/${restaurantId}/menu`);
+      const response = await fetch(`http://localhost:7000/api/admin/${restaurantId}/menu`)
       if (!response.ok) {
         throw new Error(`Failed to fetch menu: ${response.statusText}`);
       }

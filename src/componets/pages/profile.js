@@ -2,14 +2,14 @@ import React, { useEffect, useState } from "react";
 import { FaUser, FaEnvelope } from "react-icons/fa";
 
 const Profile = () => {
-  const [username, setUsername] = useState("");
+  const [name, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [editMode, setEditMode] = useState(false);
 
   // Fetch from local storage when component mounts
   useEffect(() => {
-    const storedName = localStorage.getItem("username");
-    const storedEmail = localStorage.getItem("useremail");
+    const storedName = localStorage.getItem("name");
+    const storedEmail = localStorage.getItem("email");
 
     if (storedName) setUsername(storedName);
     if (storedEmail) setEmail(storedEmail);
@@ -17,11 +17,11 @@ const Profile = () => {
 
   // Save updated user details to local storage
   const handleSave = () => {
-    if (!username || !email) {
+    if (!name || !email) {
       alert("Please enter valid details.");
       return;
     }
-    localStorage.setItem("username", username);
+    localStorage.setItem("username", name);
     localStorage.setItem("useremail", email);
     setEditMode(false);
     alert("Profile updated successfully!");
@@ -42,7 +42,7 @@ const Profile = () => {
             <>
               <h5 className="card-title">
                 <FaUser className="text-danger me-2" />
-                {username || "Guest"}
+                {name || "Guest"}
               </h5>
               <p className="card-text">
                 <FaEnvelope className="text-danger me-2" />
@@ -59,7 +59,7 @@ const Profile = () => {
                 <input
                   type="text"
                   className="form-control"
-                  value={username}
+                  value={name}
                   onChange={(e) => setUsername(e.target.value)}
                 />
               </div>

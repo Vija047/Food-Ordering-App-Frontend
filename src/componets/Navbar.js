@@ -87,6 +87,10 @@ function Navbar() {
     navigate("/login");
   };
 
+  const handleProfile = () => {
+    navigate("/profile"); // Navigate to Profile page correctly
+  };
+
   return (
     <nav className="navbar sticky-top bg-body-tertiary">
       <div className="container-fluid d-flex justify-content-between align-items-center">
@@ -107,17 +111,15 @@ function Navbar() {
 
         {/* Right Section: Cart Icon and Offcanvas Button */}
         <div className="d-flex align-items-center ms-auto">
-          
-          <button href="/cart" className="badge badge-danger btn border-0 position-relative">
+          <button className="badge badge-danger btn border-0 position-relative">
             <img
               src={Cart}
               alt="Cart"
-              className="w-5 h-5 object-cover rounded-lg "
+              className="w-5 h-5 object-cover rounded-lg"
             />
-  <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-    1
-  </span>
-
+            <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+              1
+            </span>
           </button>
 
           <button
@@ -162,9 +164,9 @@ function Navbar() {
                 </a>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="/profile">
+                <button className="nav-link btn btn-link" onClick={handleProfile}>
                   Profile
-                </a>
+                </button>
               </li>
               <li className="nav-item">
                 {isAuthenticated ? (
