@@ -1,17 +1,41 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAuthToken } from "../../utils/auth";
 
-const Restaurant = () => {
+const RestaurantPage = () => {
+  const [restaurants, setRestaurants] = useState([]);
   const [name, setName] = useState("");
   const [cuisine, setCuisine] = useState("");
   const [address, setAddress] = useState("");
+  
   const [response, setResponse] = useState(null);
   const [error, setError] = useState(null);
-
+  const [loading, setLoading] = useState(true);
+  const [isSubmitted, setSubmitted] = useState(false);
   const navigate = useNavigate();
+  useEffect(() => {
+    const fetchRestaurants = async () => {
+      try {
+        const response = await fetch("http://localhost:7000/api/getadmin");
+        const data = await response.json();
 
-  const fetchData = async () => {
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to fetch restaurants");
+        }
+
+        setRestaurants(data.restaurants);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRestaurants();
+  }, []);
+
+  // Function to add a new restaurant (admin only)
+  const addRestaurant = async () => {
     const token = getAuthToken(); // Get token from localStorage
 
     if (!token) {
@@ -20,6 +44,8 @@ const Restaurant = () => {
     }
 
     try {
+      setSubmitted(true); // Show "Submitted" state
+
       const res = await fetch("http://localhost:7000/api/admin", {
         method: "POST",
         headers: {
@@ -29,30 +55,55 @@ const Restaurant = () => {
         body: JSON.stringify({ name, cuisine, address }),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Restaurant submission failed!");
+        throw new Error(data.message || "Restaurant submission failed!");
       }
 
-      const data = await res.json();
       setResponse(data);
       setError(null);
-      navigate("/dashboard"); // Redirect after success
+
+      setRestaurants([...restaurants, data.restaurant]);
+      setTimeout(() => {
+        setSubmitted(false);
+        setName("");
+        setCuisine("");
+        setAddress("");
+        navigate("/dashboard");
+      }, 2000);
     } catch (err) {
       setError(err.message);
       setResponse(null);
-      console.error("Error fetching data:", err);
+      console.error("Error submitting restaurant:", err);
+      setSubmitted(false);
     }
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    await fetchData();
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    addRestaurant();
   };
 
   return (
     <div>
-      <h2>Restaurant Form</h2>
+      <h2>Restaurant List</h2>
+      {loading && <p>Loading...</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
+      <ul>
+        {restaurants.map((restaurant) => (
+          <li key={restaurant._id}>
+            <strong>{restaurant.name}</strong> - {restaurant.cuisine}, {restaurant.address}
+          </li>
+        ))}
+      </ul>
+
+      <hr />
+
+      <h2>Add New Restaurant</h2>
+      {response && <p style={{ color: "green" }}>Restaurant added successfully!</p>}
+
       <form onSubmit={handleSubmit}>
         <input
           type="text"
@@ -75,12 +126,12 @@ const Restaurant = () => {
           onChange={(e) => setAddress(e.target.value)}
           required
         />
-        <button type="submit" onClick={handleSubmit}>Submit</button>
+        <button type="submit" disabled={isSubmitted}>
+          {isSubmitted ? "Submitted" : "Submit"}
+        </button>
       </form>
-
-     
     </div>
   );
 };
 
-export default Restaurant;
+export default RestaurantPage;

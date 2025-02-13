@@ -48,8 +48,12 @@ const Register = () => {
         setError("");
         setformdata({ name: "", email: "", password: "", role: "" }); // Clear form
 
-        // Navigate to home after successful registration
-        navigate("/home");
+        // Redirect based on role
+        if (formdata.role === "admin") {
+          navigate("/restaurant"); // Redirect to the restaurant page for admin
+        } else {
+          navigate("/home"); // Redirect to home for customer
+        }
       } else {
         setError(data.message || "Registration failed!");
       }
