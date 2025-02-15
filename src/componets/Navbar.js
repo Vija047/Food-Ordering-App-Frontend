@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaMapMarkerAlt } from "react-icons/fa"; // Importing location icon
-import axios from "axios"; // For API calls
+import axios from "axios";
 import Sybol from "../assets/icons8-d-64.svg";
 import Cart from "../assets/icart.svg";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -11,10 +10,7 @@ function Navbar() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [location, setLocation] = useState("Searching...");
-  const [query, setQuery] = useState(""); // New state for search input
-  const [manualLocation, setManualLocation] = useState(null); // Manual search result
-
+  
   const navigate = useNavigate();
   const toggleOffCanvas = () => setOffCanvasOpen(!isOffCanvasOpen);
   const isAuthenticated = !!localStorage.getItem("token");
@@ -58,61 +54,6 @@ function Navbar() {
     };
   }, []);
 
-  // Fetch user's current location automatically
-  useEffect(() => {
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
-
-          try {
-            const response = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
-            );
-            const data = await response.json();
-
-            if (data && data.address) {
-              setLocation(data.address.city || data.address.town);
-            } else {
-              setLocation("Location not found");
-            }
-          } catch (error) {
-            console.error("Error fetching location:", error);
-            setLocation("Location not found");
-          }
-        },
-        (error) => {
-          console.error("Geolocation Error:", error);
-          setLocation("Location not available");
-        }
-      );
-    } else {
-      setLocation("Geolocation not supported");
-    }
-  }, []);
-
-  // Fetch location based on search query (Manual Location Search)
-  const fetchManualLocation = async () => {
-    if (!query) return;
-    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
-      query
-    )}&format=json&limit=1`;
-
-    try {
-      const response = await axios.get(url);
-      if (response.data.length === 0) {
-        setError("Location not found.");
-        setManualLocation(null);
-        return;
-      }
-      setManualLocation(response.data[0]);
-      setError("");
-    } catch (err) {
-      setError("Error fetching location data.");
-      setManualLocation(null);
-    }
-  };
-
   const handleLogout = () => {
     localStorage.removeItem("token");
     setUser(null);
@@ -124,7 +65,7 @@ function Navbar() {
   return (
     <nav className="navbar sticky-top bg-body-tertiary">
       <div className="container-fluid d-flex justify-content-between align-items-center">
-        {/* Left Section: Logo and Location */}
+        {/* Left Section: Logo */}
         <div className="d-flex flex-row align-items-center">
           <a href="/">
             <img
@@ -133,24 +74,6 @@ function Navbar() {
               className="w-16 h-16 object-cover rounded-lg"
             />
           </a>
-          <div className="location-container d-flex align-items-center mt-1 ms-3">
-            <FaMapMarkerAlt color="rgb(255, 87, 51)" size={18} />
-            <span className="fw-bold ms-2">{manualLocation ? manualLocation.display_name : location}</span>
-          </div>
-        </div>
-
-        {/* Location Search Input */}
-        <div className="d-flex">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search location..."
-            className="form-control me-2"
-          />
-          <button className="btn btn-primary" onClick={fetchManualLocation}>
-            Search
-          </button>
         </div>
 
         {/* Right Section: Cart Icon and Offcanvas Button */}

@@ -7,12 +7,16 @@ const RestaurantPage = () => {
   const [name, setName] = useState("");
   const [cuisine, setCuisine] = useState("");
   const [address, setAddress] = useState("");
-  
+  const [menuName, setMenuName] = useState("");
+  const [price, setPrice] = useState("");
+  const [selectedRestaurant, setSelectedRestaurant] = useState("");
   const [response, setResponse] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitted, setSubmitted] = useState(false);
+  const [menuMessage, setMenuMessage] = useState("");
   const navigate = useNavigate();
+
   useEffect(() => {
     const fetchRestaurants = async () => {
       try {
@@ -34,9 +38,8 @@ const RestaurantPage = () => {
     fetchRestaurants();
   }, []);
 
-  // Function to add a new restaurant (admin only)
   const addRestaurant = async () => {
-    const token = getAuthToken(); // Get token from localStorage
+    const token = getAuthToken();
 
     if (!token) {
       setError("No authentication token found! Please log in.");
@@ -44,13 +47,12 @@ const RestaurantPage = () => {
     }
 
     try {
-      setSubmitted(true); // Show "Submitted" state
-
+      setSubmitted(true);
       const res = await fetch("http://localhost:7000/api/admin", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Send token in request
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ name, cuisine, address }),
       });
@@ -63,8 +65,8 @@ const RestaurantPage = () => {
 
       setResponse(data);
       setError(null);
-
       setRestaurants([...restaurants, data.restaurant]);
+
       setTimeout(() => {
         setSubmitted(false);
         setName("");
@@ -75,25 +77,51 @@ const RestaurantPage = () => {
     } catch (err) {
       setError(err.message);
       setResponse(null);
-      console.error("Error submitting restaurant:", err);
       setSubmitted(false);
     }
   };
 
-  const handleSubmit = (e) => {
+  const addMenuItem = async (e) => {
     e.preventDefault();
-    addRestaurant();
+
+    if (!selectedRestaurant) {
+      setError("Please select a restaurant first.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://localhost:7000/api/admin/${selectedRestaurant}/menu`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: name, price }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to add menu item.");
+      }
+
+      setMenuMessage("Menu item added successfully!");
+      setMenuName("");
+      setPrice("");
+    } catch (err) {
+      setError(err.message);
+      setMenuMessage("");
+    }
   };
 
   return (
-    <div>
-      <h2>Restaurant List</h2>
+    <div className="container mt-4">
+      <h2 className="text-center">Restaurant List</h2>
       {loading && <p>Loading...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p className="text-danger">{error}</p>}
 
-      <ul>
+      <ul className="list-group mb-4">
         {restaurants.map((restaurant) => (
-          <li key={restaurant._id}>
+          <li key={restaurant._id} className="list-group-item">
             <strong>{restaurant.name}</strong> - {restaurant.cuisine}, {restaurant.address}
           </li>
         ))}
@@ -101,34 +129,92 @@ const RestaurantPage = () => {
 
       <hr />
 
-      <h2>Add New Restaurant</h2>
-      {response && <p style={{ color: "green" }}>Restaurant added successfully!</p>}
+      <h2 className="text-center">Add New Restaurant</h2>
+      {response && <p className="text-success">Restaurant added successfully!</p>}
 
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          placeholder="Cuisine"
-          value={cuisine}
-          onChange={(e) => setCuisine(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          placeholder="Address"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          required
-        />
-        <button type="submit" disabled={isSubmitted}>
-          {isSubmitted ? "Submitted" : "Submit"}
-        </button>
+      <form className="row g-3" onSubmit={(e) => { e.preventDefault(); addRestaurant(); }}>
+        <div className="col-md-4">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </div>
+        <div className="col-md-4">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Cuisine"
+            value={cuisine}
+            onChange={(e) => setCuisine(e.target.value)}
+            required
+          />
+        </div>
+        <div className="col-md-4">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Address"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            required
+          />
+        </div>
+        <div className="col-12 d-flex justify-content-end">
+          <button type="submit" className="btn btn-primary" disabled={isSubmitted}>
+            {isSubmitted ? "Submitted" : "Submit"}
+          </button>
+        </div>
+      </form>
+
+      <hr />
+
+      <h2 className="text-center">Add Menu Item</h2>
+      {menuMessage && <p className="text-success">{menuMessage}</p>}
+      {error && <p className="text-danger">{error}</p>}
+
+      <form className="row g-3" onSubmit={addMenuItem}>
+        <div className="col-md-6">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Menu Item Name"
+            value={menuName}
+            onChange={(e) => setMenuName(e.target.value)}
+            required
+          />
+        </div>
+        <div className="col-md-4">
+          <input
+            type="number"
+            className="form-control"
+            placeholder="Price"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            required
+          />
+        </div>
+        <div className="col-md-12">
+          <select
+            className="form-control"
+            value={selectedRestaurant}
+            onChange={(e) => setSelectedRestaurant(e.target.value)}
+            required
+          >
+            <option value="">Select a Restaurant</option>
+            {restaurants.map((restaurant) => (
+              <option key={restaurant._id} value={restaurant._id}>
+                {restaurant.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="col-12 d-flex justify-content-end">
+          <button type="submit" className="btn btn-success">Add Menu Item</button>
+        </div>
       </form>
     </div>
   );

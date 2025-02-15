@@ -9,13 +9,13 @@ const Footer = () => {
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4 container text-center">
              <div className="row row-cols-5">
              <h6 className="uppercase font-bold">
-                <a href="#!" className="text-black">About us</a>
+                <a href="/about us" className="text-black">About us</a>
               </h6>
               <h6 className="uppercase font-bold">
                 <a href="/menu" className="text-black">Products</a>
               </h6>
               <h6 className="uppercase font-bold">
-                <a href="#!" className="text-black">Awards</a>
+                <a href="/awrads" className="text-black">Awards</a>
               </h6>
               <h6 className="uppercase font-bold">
                 <a href="#!" className="text-black">Help</a>
