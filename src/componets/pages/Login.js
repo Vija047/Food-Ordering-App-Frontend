@@ -6,12 +6,14 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(""); // ✅ Fix: Proper state for success message
   const [showRegister, setShowRegister] = useState(false); // Toggle Register form
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccess(""); // ✅ Clear previous success messages
 
     try {
       const response = await fetch("http://localhost:7000/api/Login", {
@@ -25,7 +27,8 @@ const Login = () => {
 
       // Store token & Redirect
       localStorage.setItem("token", data.token);
-      navigate("/");
+      setSuccess("Login Successfully! 🎉"); // ✅ Show success message
+      setTimeout(() => navigate("/"), 2000); // Redirect after success
     } catch (err) {
       setError(err.message);
     }
@@ -48,6 +51,9 @@ const Login = () => {
         ) : (
           <>
             <h2 className="text-center text-primary">Login</h2>
+
+            {/* ✅ Fix: Show success and error messages */}
+            {success && <div className="alert alert-success">{success}</div>}
             {error && <div className="alert alert-danger">{error}</div>}
 
             <form onSubmit={handleLogin}>
@@ -109,4 +115,5 @@ const Login = () => {
     </div>
   );
 };
+
 export default Login;

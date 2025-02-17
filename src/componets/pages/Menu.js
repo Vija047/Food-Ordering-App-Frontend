@@ -10,7 +10,7 @@ const Menu = ({ restaurantId, addToCart }) => {
   useEffect(() => {
     const fetchMenuItems = async () => {
       try {
-        const response = await axios.get(`/api/menu/${restaurantId}`);
+        const response = await axios.get(`/getmenu/${restaurantId}`);
         setItems(response.data.menuItems || []); // Ensure it's always an array
       } catch (err) {
         setError(err.message);

@@ -12,18 +12,20 @@ const Register = () => {
   });
 
   const navigate = useNavigate();
-  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleChange = (e) => {
     setformdata({ ...formdata, [e.target.name]: e.target.value });
+    setSuccess("");
+    setError("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!formdata.name || !formdata.email || !formdata.password || !formdata.role) {
-      alert("Please fill in all fields.");
+      setError("Please fill in all fields.");
       return;
     }
 
@@ -44,16 +46,18 @@ const Register = () => {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage("Registration Successful!");
+        setSuccess("Registration Successful! 🎉");
         setError("");
-        setformdata({ name: "", email: "", password: "", role: "" }); // Clear form
+        setformdata({ name: "", email: "", password: "", role: "" });
 
         // Redirect based on role
-        if (formdata.role === "admin") {
-          navigate("/restaurant"); // Redirect to the restaurant page for admin
-        } else {
-          navigate("/home"); // Redirect to home for customer
-        }
+        setTimeout(() => {
+          if (formdata.role === "admin") {
+            navigate("/restaurant");
+          } else {
+            navigate("/home");
+          }
+        }, 1500);
       } else {
         setError(data.message || "Registration failed!");
       }
@@ -66,7 +70,7 @@ const Register = () => {
     <Container className="d-flex justify-content-center mt-5">
       <Card style={{ width: "400px" }} className="p-4 shadow">
         <h2 className="text-center">Register</h2>
-        {message && <Alert variant="success">{message}</Alert>}
+        {success && <Alert variant="success">{success}</Alert>}
         {error && <Alert variant="danger">{error}</Alert>}
 
         <Form onSubmit={handleSubmit}>

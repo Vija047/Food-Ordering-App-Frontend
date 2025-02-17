@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import Sybol from "../assets/icons8-d-64.svg";
+import Sybol from "../assets/input-onlinepngtools (2).ico";
 import Cart from "../assets/icart.svg";
 import "bootstrap/dist/css/bootstrap.min.css";
 
