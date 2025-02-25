@@ -1,25 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import Sybol from "../assets/input-onlinepngtools (2).ico";
+import Sybol from "../assets/cutlery.ico";
 import Cart from "../assets/icart.svg";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function Navbar() {
-  const [isOffCanvasOpen, setOffCanvasOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  
   const navigate = useNavigate();
-  const toggleOffCanvas = () => setOffCanvasOpen(!isOffCanvasOpen);
-  const isAuthenticated = !!localStorage.getItem("token");
 
-  // Fetch user data
+  const token = localStorage.getItem("token");
+  const userType = localStorage.getItem("usertype");
+
+  // Fetch user details if logged in
   useEffect(() => {
-    let isMounted = true;
-    const token = localStorage.getItem("token");
-
     if (!token) {
       setLoading(false);
       return;
@@ -37,84 +32,78 @@ function Navbar() {
         return response.json();
       })
       .then((data) => {
-        if (isMounted) {
-          setUser(data);
-          setLoading(false);
-        }
+        setUser(data); // ✅ Set user details
+        setLoading(false);
       })
       .catch((error) => {
-        if (isMounted) {
-          setError(error?.message || "An unexpected error occurred");
-          setLoading(false);
-        }
+        setError(error?.message || "An unexpected error occurred");
+        setLoading(false);
       });
+  }, [token]);
 
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
+  // Logout Function
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("usertype");
     setUser(null);
     navigate("/login");
   };
 
-  const handleProfile = () => navigate("/profile");
-
   return (
     <nav className="navbar sticky-top bg-body-tertiary">
       <div className="container-fluid d-flex justify-content-between align-items-center">
-        {/* Left Section: Logo */}
-        <div className="d-flex flex-row align-items-center">
+        
+        {/* Logo Section */}
+        <div className="d-flex align-items-center">
           <a href="/">
             <img
               src={Sybol}
-              alt="Symbol"
-              className="w-16 h-16 object-cover rounded-lg"
+              alt="Logo"
+              style={{ width: "40px", height: "40px" }}
+              className="rounded-lg"
             />
           </a>
         </div>
 
-        {/* Right Section: Cart Icon and Offcanvas Button */}
+        {/* User Info */}
+        <div className="d-flex flex-column align-items-center mx-3">
+          {loading ? (
+            <p>Loading...</p>
+          ) : user ? (
+            <>
+              <h5 className="m-0">{user.name}</h5>
+              <small>{user.email}</small>
+            </>
+          ) : (
+            <h5 className="m-0">Guest</h5>
+          )}
+        </div>
+
+        {/* Cart & Menu */}
         <div className="d-flex align-items-center ms-auto">
-          <button className="badge badge-danger btn border-0 position-relative">
-            <img
-              src={Cart}
-              alt="Cart"
-              className="w-5 h-5 object-cover rounded-lg"
-            />
+          <button className="btn border-0 position-relative">
+            <img src={Cart} alt="Cart" className="w-5 h-5 rounded-lg" />
             <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
               1
             </span>
           </button>
 
+          {/* Navbar Toggle Button */}
           <button
             className="navbar-toggler ms-3"
             type="button"
-            onClick={toggleOffCanvas}
-            aria-controls="offcanvasDarkNavbar"
-            aria-label="Toggle navigation"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#offcanvasMenu"
           >
             <span className="navbar-toggler-icon"></span>
           </button>
         </div>
 
         {/* Offcanvas Menu */}
-        <div
-          className={`offcanvas offcanvas-end ${isOffCanvasOpen ? "show d-block" : ""}`}
-          id="offcanvasDarkNavbar"
-        >
+        <div className="offcanvas offcanvas-end" id="offcanvasMenu">
           <div className="offcanvas-header">
-            <h5 className="offcanvas-title" id="offcanvasDarkNavbarLabel">
-              DishDash
-            </h5>
-            <button
-              type="button"
-              className="btn-close"
-              onClick={toggleOffCanvas}
-              aria-label="Close"
-            ></button>
+            <h5 className="offcanvas-title">DishDash</h5>
+            <button type="button" className="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
           </div>
           <div className="offcanvas-body">
             <ul className="navbar-nav justify-content-end flex-grow-1 pe-3">
@@ -128,13 +117,28 @@ function Navbar() {
                   Orders
                 </a>
               </li>
+
+              {/* Profile */}
+              {token && (
+                <li className="nav-item">
+                  <button className="nav-link btn btn-link" onClick={() => navigate("/profile")}>
+                    Profile
+                  </button>
+                </li>
+              )}
+
+              {/* Admin Panel */}
+              {userType === "admin" && (
+                <li className="nav-item">
+                  <a className="nav-link" href="/admin">
+                    Admin Panel
+                  </a>
+                </li>
+              )}
+
+              {/* Logout / Login */}
               <li className="nav-item">
-                <button className="nav-link btn btn-link" onClick={handleProfile}>
-                  Profile
-                </button>
-              </li>
-              <li className="nav-item">
-                {isAuthenticated ? (
+                {token ? (
                   <button className="btn btn-danger" onClick={handleLogout}>
                     Logout
                   </button>
@@ -147,6 +151,7 @@ function Navbar() {
             </ul>
           </div>
         </div>
+
       </div>
     </nav>
   );

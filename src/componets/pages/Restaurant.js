@@ -1,223 +1,159 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { getAuthToken } from "../../utils/auth";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { FaTrash } from 'react-icons/fa'; // Import delete icon
 
-const RestaurantPage = () => {
+const AddRestaurant = () => {
+  const [name, setName] = useState('');
+  const [location, setLocation] = useState('');
   const [restaurants, setRestaurants] = useState([]);
-  const [name, setName] = useState("");
-  const [cuisine, setCuisine] = useState("");
-  const [address, setAddress] = useState("");
-  const [menuName, setMenuName] = useState("");
-  const [price, setPrice] = useState("");
-  const [selectedRestaurant, setSelectedRestaurant] = useState("");
-  const [response, setResponse] = useState(null);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [isSubmitted, setSubmitted] = useState(false);
-  const [menuMessage, setMenuMessage] = useState("");
-  const navigate = useNavigate();
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   useEffect(() => {
-    const fetchRestaurants = async () => {
-      try {
-        const response = await fetch("http://localhost:7000/api/getadmin");
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || "Failed to fetch restaurants");
-        }
-
-        setRestaurants(data.restaurants);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchRestaurants();
   }, []);
 
-  const addRestaurant = async () => {
-    const token = getAuthToken();
-
-    if (!token) {
-      setError("No authentication token found! Please log in.");
-      return;
-    }
-
+  const fetchRestaurants = async () => {
     try {
-      setSubmitted(true);
-      const res = await fetch("http://localhost:7000/api/admin", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ name, cuisine, address }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Restaurant submission failed!");
-      }
-
-      setResponse(data);
-      setError(null);
-      setRestaurants([...restaurants, data.restaurant]);
-
-      setTimeout(() => {
-        setSubmitted(false);
-        setName("");
-        setCuisine("");
-        setAddress("");
-        navigate("/dashboard");
-      }, 2000);
-    } catch (err) {
-      setError(err.message);
-      setResponse(null);
-      setSubmitted(false);
+      const response = await axios.get('http://localhost:7000/api/get/admin');
+      setRestaurants(response.data);
+    } catch (error) {
+      console.error('Error fetching restaurants:', error);
+      setError('Failed to load restaurants.');
     }
   };
 
-  const addMenuItem = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setSuccess('');
 
-    if (!selectedRestaurant) {
-      setError("Please select a restaurant first.");
+    const token = localStorage.getItem('token')?.trim();
+    if (!token) {
+      setError('Unauthorized: Please log in first.');
       return;
     }
 
     try {
-      const res = await fetch(`http://localhost:7000/api/admin/${selectedRestaurant}/menu`, {
-        method: "POST",
+      const response = await axios.post(
+        'http://localhost:7000/api/admin',
+        { name, location },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      setSuccess(response.data.message);
+      setName('');
+      setLocation('');
+      
+      fetchRestaurants();
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (error) {
+      console.error("Error:", error.response?.data);
+      setError(error.response?.data?.message || 'Error adding restaurant');
+      setTimeout(() => setError(''), 3000);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    const token = localStorage.getItem('token')?.trim();
+    if (!token) {
+      setError('Unauthorized: Please log in first.');
+      return;
+    }
+
+    try {
+      await axios.delete(`http://localhost:7000/api/admin/${id}`, {
         headers: {
-          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ name: name, price }),
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to add menu item.");
-      }
-
-      setMenuMessage("Menu item added successfully!");
-      setMenuName("");
-      setPrice("");
-    } catch (err) {
-      setError(err.message);
-      setMenuMessage("");
+      setSuccess('Restaurant deleted successfully');
+      fetchRestaurants();
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (error) {
+      console.error('Error deleting restaurant:', error);
+      setError('Failed to delete restaurant.');
+      setTimeout(() => setError(''), 3000);
     }
   };
 
   return (
-    <div className="container mt-4">
-      <h2 className="text-center">Restaurant List</h2>
-      {loading && <p>Loading...</p>}
-      {error && <p className="text-danger">{error}</p>}
+    <div className="container">
+      <h2 className="text-center mt-4">Add a New Restaurant</h2>
 
-      <ul className="list-group mb-4">
-        {restaurants.map((restaurant) => (
-          <li key={restaurant._id} className="list-group-item">
-            <strong>{restaurant.name}</strong> - {restaurant.cuisine}, {restaurant.address}
-          </li>
-        ))}
-      </ul>
+      {error && <div className="alert alert-danger">{error}</div>}
+      {success && <div className="alert alert-success">{success}</div>}
 
-      <hr />
+      <div className="card p-4 shadow-sm mt-3">
+        <form onSubmit={handleSubmit}>
+          <div className="mb-3">
+            <label className="form-label">Restaurant Name</label>
+            <input
+              type="text"
+              className="form-control"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </div>
 
-      <h2 className="text-center">Add New Restaurant</h2>
-      {response && <p className="text-success">Restaurant added successfully!</p>}
+          <div className="mb-3">
+            <label className="form-label">Location</label>
+            <input
+              type="text"
+              className="form-control"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              required
+            />
+          </div>
 
-      <form className="row g-3" onSubmit={(e) => { e.preventDefault(); addRestaurant(); }}>
-        <div className="col-md-4">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-        </div>
-        <div className="col-md-4">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Cuisine"
-            value={cuisine}
-            onChange={(e) => setCuisine(e.target.value)}
-            required
-          />
-        </div>
-        <div className="col-md-4">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Address"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            required
-          />
-        </div>
-        <div className="col-12 d-flex justify-content-end">
-          <button type="submit" className="btn btn-primary" disabled={isSubmitted}>
-            {isSubmitted ? "Submitted" : "Submit"}
+          <button type="submit" className="btn btn-primary w-100">
+            Add Restaurant
           </button>
-        </div>
-      </form>
+        </form>
+      </div>
 
-      <hr />
-
-      <h2 className="text-center">Add Menu Item</h2>
-      {menuMessage && <p className="text-success">{menuMessage}</p>}
-      {error && <p className="text-danger">{error}</p>}
-
-      <form className="row g-3" onSubmit={addMenuItem}>
-        <div className="col-md-6">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Menu Item Name"
-            value={menuName}
-            onChange={(e) => setMenuName(e.target.value)}
-            required
-          />
-        </div>
-        <div className="col-md-4">
-          <input
-            type="number"
-            className="form-control"
-            placeholder="Price"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            required
-          />
-        </div>
-        <div className="col-md-12">
-          <select
-            className="form-control"
-            value={selectedRestaurant}
-            onChange={(e) => setSelectedRestaurant(e.target.value)}
-            required
-          >
-            <option value="">Select a Restaurant</option>
-            {restaurants.map((restaurant) => (
-              <option key={restaurant._id} value={restaurant._id}>
-                {restaurant.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="col-12 d-flex justify-content-end">
-          <button type="submit" className="btn btn-success">Add Menu Item</button>
-        </div>
-      </form>
+      <h3 className="mt-4">Restaurant List</h3>
+      <table className="table table-bordered mt-3">
+        <thead className="table-dark">
+          <tr>
+            <th>Name</th>
+            <th>Location</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {restaurants.length > 0 ? (
+            restaurants.map((restaurant, index) => (
+              <tr key={index}>
+                <td>{restaurant.name}</td>
+                <td>{restaurant.location}</td>
+                <td>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() => handleDelete(restaurant._id)}
+                  >
+                    <FaTrash /> {/* Delete Icon */}
+                  </button>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="3" className="text-center">No restaurants available</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
     </div>
   );
 };
 
-export default RestaurantPage;
+export default AddRestaurant;
