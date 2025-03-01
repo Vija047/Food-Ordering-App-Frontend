@@ -4,9 +4,9 @@ import Navbar from "./componets/Navbar";
 import Login from "./componets/pages/Login";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Restaurant from "./componets/pages/Restaurant";
-import OrderMenu from "./componets/pages/ordermenu";
-import Order from "./componets/pages/Orders"
-import Order1 from "./componets/pages/Orders";
+import Order from "./componets/pages/Orders";
+import Menu from "./componets/pages/Menu";
+import Profile from "./componets/pages/profile";
 import Home from "./componets/pages/home";
 import Loader from "./componets/loader";
 import Cart from "./componets/pages/cart";
@@ -38,9 +38,11 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/home" element={<Home />} />
             <Route path="/restaurant" element={<Restaurant />} />
-            <Route path="/menu" element={<OrderMenu/>} />
+         
             <Route path="/order" element={<Order />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/menu" element={<Menu />} />
           </Routes>
         )}
       </div>

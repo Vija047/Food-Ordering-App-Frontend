@@ -109,6 +109,9 @@ const handlecart=()=>{
                 <a className="nav-link active" href="/home">Home</a>
               </li>
               <li className="nav-item">
+                <a className="nav-link" href="/menu">Menu</a>
+              </li>
+              <li className="nav-item">
                 <a className="nav-link" href="/order">Orders</a>
               </li>
               {token && (

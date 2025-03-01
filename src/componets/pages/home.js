@@ -40,7 +40,7 @@ const Home = () => {
 
           <div className="mt-4">
             <button
-              onClick={() => navigate("/order")}
+              onClick={() => navigate("/menu")}
               className="btn btn-warning me-3 px-4 py-2"
             >
               Order Menu
