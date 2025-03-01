@@ -4,8 +4,12 @@ import Navbar from "./componets/Navbar";
 import Login from "./componets/pages/Login";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Restaurant from "./componets/pages/Restaurant";
+import OrderMenu from "./componets/pages/ordermenu";
+import Order from "./componets/pages/Orders"
+import Order1 from "./componets/pages/Orders";
 import Home from "./componets/pages/home";
 import Loader from "./componets/loader";
+import Cart from "./componets/pages/cart";
 function App() {
   const [loading, setLoading] = useState(true);
 
@@ -20,7 +24,7 @@ function App() {
     <Router>
       <div className="App">
         <Navbar />
-
+     
         {loading ? (
           <div className="d-flex justify-content-center align-items-center" style={{ height: "100vh" }}>
             {/* <div className="spinner-border text-#FFFF00" role="status"> */}
@@ -34,6 +38,9 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/home" element={<Home />} />
             <Route path="/restaurant" element={<Restaurant />} />
+            <Route path="/menu" element={<OrderMenu/>} />
+            <Route path="/order" element={<Order />} />
+            <Route path="/cart" element={<Cart />} />
           </Routes>
         )}
       </div>

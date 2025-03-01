@@ -3,11 +3,11 @@ import { useNavigate } from "react-router-dom";
 import Sybol from "../assets/cutlery.ico";
 import Cart from "../assets/icart.svg";
 import "bootstrap/dist/css/bootstrap.min.css";
+import bootstrap from "bootstrap/dist/js/bootstrap.bundle.min.js";
 
 function Navbar() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
@@ -32,21 +32,31 @@ function Navbar() {
         return response.json();
       })
       .then((data) => {
-        setUser(data); // ✅ Set user details
+        setUser(data);
         setLoading(false);
       })
-      .catch((error) => {
-        setError(error?.message || "An unexpected error occurred");
+      .catch(() => {
         setLoading(false);
       });
   }, [token]);
-
+const handlecart=()=>{
+  navigate("/cart");
+}
   // Logout Function
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("usertype");
     setUser(null);
     navigate("/login");
+  };
+
+  // Handle Navbar Toggle
+  const handleToggle = () => {
+    const offcanvasMenu = document.getElementById("offcanvasMenu");
+    if (offcanvasMenu) {
+      const bsOffcanvas = new bootstrap.Offcanvas(offcanvasMenu);
+      bsOffcanvas.toggle();
+    }
   };
 
   return (
@@ -56,12 +66,7 @@ function Navbar() {
         {/* Logo Section */}
         <div className="d-flex align-items-center">
           <a href="/">
-            <img
-              src={Sybol}
-              alt="Logo"
-              style={{ width: "40px", height: "40px" }}
-              className="rounded-lg"
-            />
+            <img src={Sybol} alt="Logo" style={{ width: "40px", height: "40px" }} className="rounded-lg" />
           </a>
         </div>
 
@@ -81,20 +86,13 @@ function Navbar() {
 
         {/* Cart & Menu */}
         <div className="d-flex align-items-center ms-auto">
-          <button className="btn border-0 position-relative">
+          <button className="btn border-0 position-relative" onClick={handlecart}>
             <img src={Cart} alt="Cart" className="w-5 h-5 rounded-lg" />
-            <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-              1
-            </span>
+            <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">1</span>
           </button>
 
           {/* Navbar Toggle Button */}
-          <button
-            className="navbar-toggler ms-3"
-            type="button"
-            data-bs-toggle="offcanvas"
-            data-bs-target="#offcanvasMenu"
-          >
+          <button className="navbar-toggler ms-3" type="button" onClick={handleToggle}>
             <span className="navbar-toggler-icon"></span>
           </button>
         </div>
@@ -108,50 +106,31 @@ function Navbar() {
           <div className="offcanvas-body">
             <ul className="navbar-nav justify-content-end flex-grow-1 pe-3">
               <li className="nav-item">
-                <a className="nav-link active" href="/home">
-                  Home
-                </a>
+                <a className="nav-link active" href="/home">Home</a>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="/order">
-                  Orders
-                </a>
+                <a className="nav-link" href="/order">Orders</a>
               </li>
-
-              {/* Profile */}
               {token && (
                 <li className="nav-item">
-                  <button className="nav-link btn btn-link" onClick={() => navigate("/profile")}>
-                    Profile
-                  </button>
+                  <button className="nav-link btn btn-link" onClick={() => navigate("/profile")}>Profile</button>
                 </li>
               )}
-
-              {/* Admin Panel */}
               {userType === "admin" && (
                 <li className="nav-item">
-                  <a className="nav-link" href="/admin">
-                    Admin Panel
-                  </a>
+                  <a className="nav-link" href="/admin">Admin Panel</a>
                 </li>
               )}
-
-              {/* Logout / Login */}
               <li className="nav-item">
                 {token ? (
-                  <button className="btn btn-danger" onClick={handleLogout}>
-                    Logout
-                  </button>
+                  <button className="btn btn-danger" onClick={handleLogout}>Logout</button>
                 ) : (
-                  <a className="nav-link" href="/login">
-                    Login
-                  </a>
+                  <a className="nav-link" href="/login">Login</a>
                 )}
               </li>
             </ul>
           </div>
         </div>
-
       </div>
     </nav>
   );
