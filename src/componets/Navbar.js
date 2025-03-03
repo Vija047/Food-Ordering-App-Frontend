@@ -6,16 +6,16 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import bootstrap from "bootstrap/dist/js/bootstrap.bundle.min.js";
 
 function Navbar() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")) || null);
+  const [loading, setLoading] = useState(!user);
   const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
   const userType = localStorage.getItem("usertype");
 
-  // Fetch user details if logged in
+  // Fetch user details when component mounts
   useEffect(() => {
-    if (!token) {
+    if (!token || user) {
       setLoading(false);
       return;
     }
@@ -33,21 +33,30 @@ function Navbar() {
       })
       .then((data) => {
         setUser(data);
+        localStorage.setItem("user", JSON.stringify(data)); // Store user data
         setLoading(false);
       })
-      .catch(() => {
-        setLoading(false);
-      });
+      .catch(() => setLoading(false));
   }, [token]);
-const handlecart=()=>{
-  navigate("/cart");
-}
-  // Logout Function
+
+  // Listen for localStorage changes (e.g., after login/logout)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setUser(JSON.parse(localStorage.getItem("user")) || null);
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  // Handle Logout
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("usertype");
+    localStorage.removeItem("user"); // Clear user data
     setUser(null);
     navigate("/login");
+    window.dispatchEvent(new Event("storage")); // Force update across tabs
   };
 
   // Handle Navbar Toggle
@@ -86,7 +95,7 @@ const handlecart=()=>{
 
         {/* Cart & Menu */}
         <div className="d-flex align-items-center ms-auto">
-          <button className="btn border-0 position-relative" onClick={handlecart}>
+          <button className="btn border-0 position-relative" onClick={() => navigate("/cart")}>
             <img src={Cart} alt="Cart" className="w-5 h-5 rounded-lg" />
             <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">1</span>
           </button>
@@ -113,6 +122,9 @@ const handlecart=()=>{
               </li>
               <li className="nav-item">
                 <a className="nav-link" href="/order">Orders</a>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link" href="/location">Location</a>
               </li>
               {token && (
                 <li className="nav-item">

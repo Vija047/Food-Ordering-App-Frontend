@@ -10,6 +10,10 @@ import Profile from "./componets/pages/profile";
 import Home from "./componets/pages/home";
 import Loader from "./componets/loader";
 import Cart from "./componets/pages/cart";
+import About from "./componets/pages/about";
+import Help from "./componets/help";
+import Contact from "./componets/contact";
+// import LocationTracker from "./componets/pages/Location";
 function App() {
   const [loading, setLoading] = useState(true);
 
@@ -43,6 +47,10 @@ function App() {
             <Route path="/cart" element={<Cart />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/menu" element={<Menu />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/help" element={<Help />} />
+            <Route path="/contact" element={<Contact />} />
+            {/* <Route path="/location" element={<LocationTracker />} /> */}
           </Routes>
         )}
       </div>

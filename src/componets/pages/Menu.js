@@ -1,139 +1,97 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const OrderWithCart = () => {
-    const [cart, setCart] = useState([]);
-    const [orderId, setOrderId] = useState("");
-    const [orderDetails, setOrderDetails] = useState(null);
+    const [restaurants, setRestaurants] = useState([]);
+    const [selectedRestaurant, setSelectedRestaurant] = useState(null);
+    const [menuItems, setMenuItems] = useState([]);
+    const [cart, setCart] = useState([]); // ✅ Cart state added
 
-    // Sample menu items (Replace with API call if needed)
-    const menuItems = [
-        { id: "1", name: "🍔 Burger", price: 100 },
-        { id: "2", name: "🍕 Pizza", price: 200 },
-        { id: "3", name: "🍝 Pasta", price: 150 },
-    ];
+    useEffect(() => {
+        const fetchRestaurants = async () => {
+            try {
+                const response = await axios.get("http://localhost:7000/api/get/admin");
+                setRestaurants(response.data);
+            } catch (error) {
+                console.error("Error fetching restaurants:", error);
+            }
+        };
+        fetchRestaurants();
+    }, []);
 
-    // Add item to cart
-    const addToCart = (item) => {
-        setCart([...cart, item]);
-    };
-
-    // Remove item from cart
-    const removeFromCart = (index) => {
-        const updatedCart = cart.filter((_, i) => i !== index);
-        setCart(updatedCart);
-    };
-
-    // Place an order
-    const placeOrder = async () => {
-        if (cart.length === 0) {
-            alert("🛒 Your cart is empty!");
-            return;
-        }
-
-        const totalPrice = cart.reduce((acc, item) => acc + item.price, 0);
-        const items = cart.map(item => ({ name: item.name, price: item.price }));
-
+    const handleRestaurantClick = async (restaurant) => {
+        setSelectedRestaurant(restaurant);
+        setMenuItems([]); // Clear menu before fetching new items
         try {
-            const response = await axios.post("http://localhost:7000/api/orders", {
-                restaurant: "65abc123xyz456", // Internal restaurant ID
-                items,
-                totalPrice
-            });
-
-            setOrderId(response.data.order._id);
-            setCart([]); // Clear cart after placing order
-            alert("✅ Order placed successfully! Your Order ID: " + response.data.order._id);
+            const response = await axios.get(`http://localhost:7000/api/getmenu/${restaurant._id}`);
+            setMenuItems(response.data);
         } catch (error) {
-            alert("❌ Error placing order");
+            console.error("Error fetching menu items:", error);
         }
     };
 
-    // Get order details
-    const getOrderDetails = async () => {
-        if (!orderId) {
-            alert("📦 Enter a valid Order ID!");
-            return;
-        }
-
-        try {
-            const response = await axios.get(`http://localhost:7000/api/${orderId}`);
-            const { _id, items, totalPrice, status } = response.data;
-
-            setOrderDetails({ id: _id, items, totalPrice, status });
-        } catch (error) {
-            alert("❌ Error fetching order details");
-        }
+    // ✅ Add to Cart Function
+    const handleAddToCart = (item) => {
+        setCart([...cart, item]); // Adds item to cart
     };
 
     return (
         <div className="container mt-5">
-            <h2 className="text-center text-primary mb-4">📜 Menu</h2>
-
-            {/* Menu Items */}
             <div className="row">
-                {menuItems.map(item => (
-                    <div key={item.id} className="col-md-4 mb-4">
-                        <div className="card shadow-sm border-0">
-                            <div className="card-body text-center">
-                                <h5 className="card-title">{item.name}</h5>
-                                <p className="card-text text-muted">₹{item.price}</p>
-                                <button className="btn btn-success w-100" onClick={() => addToCart(item)}>
-                                    🛒 Add to Cart
-                                </button>
+                {restaurants.length === 0 ? (
+                    <p className="text-center text-muted">No restaurants available.</p>
+                ) : (
+                    restaurants.map((restaurant) => (
+                        <div key={restaurant._id} className="col-md-4 mb-4">
+                            <div className="card shadow-sm border-0" onClick={() => handleRestaurantClick(restaurant)}>
+                                <img src={restaurant.image} alt={restaurant.name} className="card-img-top" style={{ height: "200px", objectFit: "cover" }} />
+                                <div className="card-body text-center">
+                                    <h5 className="card-title">{restaurant.name}</h5>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))}
+                    ))
+                )}
             </div>
+
+            {/* Menu Section */}
+            {selectedRestaurant && (
+                <div className="mt-5">
+                    <h3 className="text-center text-success">🍽️ {selectedRestaurant.name} - Menu</h3>
+                    <div className="row">
+                        {menuItems.length === 0 ? (
+                            <p className="text-center text-muted">No menu items available.</p>
+                        ) : (
+                            menuItems.map((item) => (
+                                <div key={item._id} className="col-md-4 mb-4">
+                                    <div className="card shadow-sm border-0">
+                                        <img src={item.image} alt={item.name} className="card-img-top" style={{ height: "150px", objectFit: "cover" }} />
+                                        <div className="card-body text-center">
+                                            <h5 className="card-title">{item.name}</h5>
+                                            <p className="text-muted">₹{item.price}</p>
+                                            <button className="btn btn-sm btn-primary" onClick={() => handleAddToCart(item)}>Add to Cart</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Cart Section */}
-            <h2 className="text-center text-warning mt-5">🛒 Your Cart</h2>
-            {cart.length === 0 ? (
-                <p className="text-center text-muted">Your cart is empty</p>
-            ) : (
-                <ul className="list-group">
-                    {cart.map((item, index) => (
-                        <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
-                            {item.name} - ₹{item.price}
-                            <button className="btn btn-danger btn-sm" onClick={() => removeFromCart(index)}>❌ Remove</button>
-                        </li>
-                    ))}
-                </ul>
-            )}
-            <button className="btn btn-primary w-100 mt-3" onClick={placeOrder} disabled={cart.length === 0}>
-                ✅ Place Order
-            </button>
-
-            {/* Order Retrieval */}
-            <h2 className="text-center text-secondary mt-5">📦 Track Your Order</h2>
-            <div className="input-group mb-3">
-                <input 
-                    type="text" 
-                    className="form-control" 
-                    placeholder="Enter Order ID" 
-                    value={orderId} 
-                    onChange={(e) => setOrderId(e.target.value)} 
-                />
-                <button className="btn btn-info" onClick={getOrderDetails}>🔍 Find Order</button>
-            </div>
-
-            {/* Order Details */}
-            {orderDetails && (
-                <div className="card mt-4 shadow-sm">
-                    <div className="card-body">
-                        <h3 className="card-title text-success">📦 Order Details</h3>
-                        <p><strong>Order ID:</strong> {orderDetails.id}</p>
-                        <p><strong>Status:</strong> {orderDetails.status}</p>
-                        <p><strong>Total Price:</strong> ₹{orderDetails.totalPrice}</p>
-                        <h4>🍽 Items Ordered:</h4>
-                        <ul className="list-group">
-                            {orderDetails.items.map((item, index) => (
-                                <li key={index} className="list-group-item">{item.name} - ₹{item.price}</li>
-                            ))}
-                        </ul>
-                    </div>
+            {cart.length > 0 && (
+                <div className="mt-5">
+                    <h3 className="text-center text-warning">🛒 Your Cart</h3>
+                    <ul className="list-group">
+                        {cart.map((item, index) => (
+                            <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
+                                {item.name} - ₹{item.price}
+                                <span className="badge bg-success">{selectedRestaurant?.name}</span>
+                            </li>
+                        ))}
+                    </ul>
                 </div>
             )}
         </div>
